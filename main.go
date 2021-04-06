@@ -15,6 +15,7 @@ var (
 	discordBotToken    = os.Getenv("DISCORD_BOT_TOKEN")
 	natsUrl            = os.Getenv("NATS_URL")
 	publishTopicPrefix = os.Getenv("PUBLISH_TOPIC_PREFIX")
+	messagePrefix      = os.Getenv("MESSAGE_PREFIX")
 )
 
 var isStringAlphabetic = regexp.MustCompile(`^[a-zA-Z0-9_-]+$`).MatchString
@@ -56,8 +57,11 @@ func messageCreateHandler(c *nats.EncodedConn) func(*discordgo.Session, *discord
 		if msg.Author.Bot {
 			return
 		}
+		if !strings.HasPrefix(msg.Content, messagePrefix) {
+			return
+		}
 
-		args := strings.Fields(msg.Content)
+		args := strings.Fields(strings.TrimPrefix(msg.Content, messagePrefix))
 		if len(args) == 0 {
 			return
 		}
